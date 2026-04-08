@@ -1,0 +1,51 @@
+name: "Train and Deploy"
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id:       ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id:       ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set MLflow tracking URI
+        run: |
+          URI=$(az ml workspace show \
+            --name ${{ secrets.AZURE_ML_WORKSPACE }} \
+            --resource-group ${{ secrets.AZURE_ML_RESOURCE_GROUP }} \
+            --query mlflow_tracking_uri -o tsv)
+          echo "MLFLOW_TRACKING_URI=$URI" >> $GITHUB_ENV
+
+      - name: Train model
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          AZURE_ML_WORKSPACE: ${{ secrets.AZURE_ML_WORKSPACE }}
+          AZURE_ML_RESOURCE_GROUP: ${{ secrets.AZURE_ML_RESOURCE_GROUP }}
+        run: python train.py
+
+      - name: Show metrics
+        run: cat model/metrics.json
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          package: .
+          startup-command: "uvicorn app:app --host 0.0.0.0 --port 8000"
