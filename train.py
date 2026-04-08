@@ -4,7 +4,7 @@ Run locally:  python train.py
 GitHub Actions runs this automatically on every push.
 Model is saved to model/  and tracked in mlruns/
 """
-import json, warnings, os
+import json, warnings, os, shutil
 import numpy as np
 import pandas as pd
 import mlflow
@@ -110,6 +110,7 @@ with mlflow.start_run(run_name=f"train-{os.getenv('GITHUB_SHA','local')[:7]}"):
 
     # ── Save model + artifacts ────────────────────────────────────────────────
     os.makedirs("model", exist_ok=True)
+    if os.path.exists("model/rf"): shutil.rmtree("model/rf")
     mlflow.sklearn.save_model(model, "model/rf")
     with open("model/features.json", "w") as f:
         json.dump(feature_cols, f)
