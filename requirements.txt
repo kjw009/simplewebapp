@@ -6,3 +6,4 @@ pandas
 scikit-learn
 imbalanced-learn
 pydantic
+azureml-mlflow
