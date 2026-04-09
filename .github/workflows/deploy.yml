@@ -50,9 +50,18 @@ jobs:
       - name: Show metrics
         run: cat model/metrics.json
 
+      # ✅ NEW: Zip the app before deployment
+      - name: Zip app
+        run: zip -r app.zip . -x "*.git*"
+
+      # ✅ FIXED: Deploy using Azure CLI (OIDC-compatible)
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/CLI@v1
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          package: .
-          startup-command: "python -m uvicorn app:app --host 0.0.0.0 --port 8000"
+          inlineScript: |
+            az webapp deploy \
+              --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --src-path app.zip \
+              --type zip \
+              --restart true
