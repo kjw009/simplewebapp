@@ -4,4 +4,5 @@ mlflow
 numpy
 pandas
 scikit-learn
+imbalanced-learn
 pydantic
