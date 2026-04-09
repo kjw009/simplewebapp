@@ -1,0 +1,8 @@
+Name                  SubscriptionId                        TenantId
+--------------------  ------------------------------------  ------------------------------------
+Azure subscription 1  eceb30d1-bfc3-453e-8d2e-2cbfd3ed3b16  ef61c210-9861-4087-bf3d-cd8e4028cc84
+
+
+client id = 83349b4-b252-4468-8add-a1943f28b00f
+
+=== SP Object ID: bfd26afb-9a82-4664-9eb2-43bfad22f3ab ===
